@@ -2,9 +2,11 @@ pipeline {
   agent none
   stages {
     stage('Build') {
-      agent { docker 'maven:3-alpine' }
+      agent {
+        docker 'maven:3-alpine'
+      }
       steps {
-        sh 'ls'
+        sh 'ls -lah'
       }
     }
   }
