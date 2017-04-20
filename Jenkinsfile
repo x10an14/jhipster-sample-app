@@ -3,6 +3,7 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
+          git 'https://github.com/rtyler/jhipster-sample-app'
           stash includes: '**', name: 'ws', useDefaultExcludes: false
       }
     }
@@ -27,8 +28,9 @@ pipeline {
         }
         steps {
             unstash 'ws'
-            sh './mvnw -B test'
+            sh './mvnw -B test package'
             junit '**/surefire-reports/**/*.xml'
+            stash name: 'war', includes: 'target/**/*.war'
         }
     }
     stage('Test Frontend') {
@@ -61,7 +63,8 @@ pipeline {
         }
         steps {
             unstash 'ws'
-            sh './mvnw -B package docker:build'
+            unstash 'war'
+            sh './mvnw -B docker:build'
         }
     }
     stage('Deploy to Staging') {
@@ -73,6 +76,7 @@ pipeline {
     stage('Deploy to production') {
         agent any
         steps {
+            input message: 'Deploy to production?', ok: 'Fire zee missiles!'
             echo "Let's pretend a production deployment is happening"
         }
     }
