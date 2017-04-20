@@ -19,39 +19,37 @@ pipeline {
             sh './mvnw -B clean compile'
         }
     }
-    stage('Test Backend') {
-        agent {
-            docker {
-                image 'maven:3-alpine'
-                args '-v /root/.m2:/root/.m2'
-            }
-        }
+    stage('Tests') {
         steps {
-            unstash 'ws'
-            sh './mvnw -B test package'
-            junit '**/surefire-reports/**/*.xml'
-            stash name: 'war', includes: 'target/**/*.war'
-        }
-    }
-    stage('Test Frontend') {
-        agent { docker 'node:alpine' }
-        steps {
-            unstash 'ws'
-            sh 'yarn install'
-            sh 'yarn global add gulp-cli'
-            sh 'gulp test'
-        }
-    }
-    stage('Performance Tests') {
-        agent {
-            docker {
-                image 'maven:3-alpine'
-                args '-v /root/.m2:/root/.m2'
-            }
-        }
-        steps {
-            unstash 'ws'
-            sh './mvnw -B gatling:execute'
+            parallel(
+                'Backend': {
+                    node {
+                        unstash 'ws'
+                        docker.image('maven:3-alpine').inside('-v /root/.m2:/root/.m2') {
+                            sh './mvnw -B test package'
+                        }                        
+                        junit '**/surefire-reports/**/*.xml'
+                        stash name: 'war', includes: 'target/**/*.war'
+                    }
+            },
+                'Frontend': {
+                    node {
+                        unstash 'ws'
+                        docker.image('node:alpine').inside {
+                            sh 'yarn install'
+                            sh 'yarn global add gulp-cli'
+                            sh 'gulp test'
+                        }
+                    }
+            },
+                'Performance': {
+                    node {
+                        unstash 'ws'
+                        docker.image('maven:3-alpine').inside('-v /root/.m2:/root/.m2') {
+                            sh './mvnw -B gatling:execute'
+                        }
+                    }
+            })
         }
     }
     stage('Build Container') {
