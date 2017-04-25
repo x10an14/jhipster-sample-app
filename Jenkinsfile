@@ -19,6 +19,7 @@ pipeline {
         steps {
             unstash 'ws'
             sh './mvnw -B clean compile'
+            stash name: 'war', includes: 'target/**/*.war'
         }
     }
     stage('Backend') {
@@ -32,12 +33,13 @@ pipeline {
             parallel(
                 'Unit' : {
                     unstash 'ws'
+                    unstash 'war'
                     sh './mvnw -B test package'
                     junit '**/surefire-reports/**/*.xml'
-                    stash name: 'war', includes: 'target/**/*.war'
                 },
                 'Performance' : {
                     unstash 'ws'
+                    unstash 'war'
                     sh './mvnw -B gatling:execute'
                 })
         }
