@@ -3,7 +3,9 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-          git 'https://github.com/rtyler/jhipster-sample-app'
+          // Used only for non-Multibranch Pipelines
+          // git 'https://github.com/rtyler/jhipster-sample-app'
+          checkout scm
           stash includes: '**', name: 'ws', useDefaultExcludes: false
       }
     }
