@@ -18,7 +18,7 @@ pipeline {
         }
         steps {
             unstash 'ws'
-            sh './mvnw -B clean compile'
+            sh './mvnw -B -DskipTests=true clean compile package'
             stash name: 'war', includes: 'target/**/*.war'
         }
     }
@@ -34,7 +34,7 @@ pipeline {
                 'Unit' : {
                     unstash 'ws'
                     unstash 'war'
-                    sh './mvnw -B test package'
+                    sh './mvnw -B test'
                     junit '**/surefire-reports/**/*.xml'
                 },
                 'Performance' : {
