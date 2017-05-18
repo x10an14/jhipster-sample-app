@@ -45,13 +45,7 @@ pipeline {
                             docker.build('latest', 'docker/gulp/').inside {
                                 unstash 'ws'
                                 //sh 'gulp test'
-                                sh '''#!/bin/bash
-                                    for i in {0..15}
-                                    do
-                                        echo "$i"
-                                        sleep 1
-                                    done
-                                '''
+                                sh './frontEndTests.sh'
                             }
                         }
                     }
