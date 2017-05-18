@@ -40,21 +40,25 @@ pipeline {
             steps {
                 parallel(
                 'Frontend' : {
-                    node {
-                        docker.image('node:alpine').inside {
-                            unstash 'ws'
-                            sh 'yarn install'
-                            sh 'yarn global add gulp-cli'
-                            sh 'gulp test'
+                    script {
+                        node {
+                            docker.image('node:alpine').inside {
+                                unstash 'ws'
+                                sh 'yarn install'
+                                sh 'yarn global add gulp-cli'
+                                sh 'gulp test'
+                            }
                         }
                     }
                 },
                 'Performance' : {
-                    node {
-                        docker.image('maven:3-alpine').inside('-v /home/rsandell/.m2:/root/.m2') {
-                            unstash 'ws'
-                            unstash 'war'
-                            sh './mvnw -B gatling:execute'
+                    script {
+                        node {
+                            docker.image('maven:3-alpine').inside('-v /home/rsandell/.m2:/root/.m2') {
+                                unstash 'ws'
+                                unstash 'war'
+                                sh './mvnw -B gatling:execute'
+                            }
                         }
                     }
                 })
