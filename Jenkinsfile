@@ -1,6 +1,6 @@
 pipeline {
     environment {
-        REL_VERSION = "${env.BRANCH_NAME.startswith('release-') ? "${env.BRANCH_NAME.drop(8)}.${env.BUILD_NUMBER}" : ""}"
+        REL_VERSION = "${env.BRANCH_NAME.contains('release-') ? "${env.BRANCH_NAME.drop(env.BRANCH_NAME.lastIndexOf('-')+1)}.${env.BUILD_NUMBER}" : ""}"
     }
     agent none
     stages {
@@ -53,6 +53,12 @@ pipeline {
         }
         stage('Test More') {
             agent none
+            when {
+                anyOf {
+                    branch "master"
+                    branch "release-*"
+                }
+            }
             steps {
                 parallel(
                 'Frontend' : {
@@ -85,7 +91,7 @@ pipeline {
                }
             }
             when {
-                allOf {
+                anyOf {
                     branch "master"
                     branch "release-*"
                 }
@@ -107,7 +113,7 @@ pipeline {
                 STAGING_AUTH = credentials('staging')
             }
             when {
-                allOf {
+                anyOf {
                     branch "master"
                     branch "release-*"
                 }
