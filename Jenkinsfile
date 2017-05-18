@@ -11,7 +11,7 @@ pipeline {
             agent {
                 docker {
                     image 'maven:3-alpine'
-                    args "-v ${env.HOME}/.m2:/root/.m2"
+                    args "-v ${HOME}/.m2:/root/.m2"
                 }
             }
             steps {
@@ -24,7 +24,7 @@ pipeline {
             agent {
                 docker {
                     image 'maven:3-alpine'
-                    args '-v ${env.HOME}/.m2:/root/.m2'
+                    args '-v ${HOME}/.m2:/root/.m2'
                 }
             }
             steps {
@@ -52,7 +52,7 @@ pipeline {
                 'Performance' : {
                     script {
                         node {
-                            docker.image('maven:3-alpine').inside('-v ${env.HOME}/.m2:/root/.m2') {
+                            docker.image('maven:3-alpine').inside('-v ${HOME}/.m2:/root/.m2') {
                                 unstash 'ws'
                                 unstash 'war'
                                 sh './mvnw -B gatling:execute'
@@ -66,7 +66,7 @@ pipeline {
             agent {
                docker {
                    image 'maven:3-alpine'
-                   args '-v ${env.HOME}/.m2:/root/.m2 -v /var/run/docker.sock:/var/run/docker.sock'
+                   args '-v ${HOME}/.m2:/root/.m2 -v /var/run/docker.sock:/var/run/docker.sock'
                }
             }
             when {
