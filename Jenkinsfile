@@ -14,11 +14,6 @@ pipeline {
                     args '-v $HOME/.m2:/root/.m2'
                 }
             }
-            when {
-                expression {
-                    false
-                }
-            }
             steps {
                 unstash 'ws'
                 sh './mvnw -B -DskipTests=true clean compile package'
@@ -30,11 +25,6 @@ pipeline {
                 docker {
                     image 'maven:3-alpine'
                     args '-v $HOME/.m2:/root/.m2'
-                }
-            }
-            when {
-                expression {
-                    false
                 }
             }
             steps {
@@ -52,24 +42,21 @@ pipeline {
                 'Frontend' : {
                     script {
                         node {
-                            docker.build('latest', 'docker/gulp/').inside {
-                                unstash 'ws'
-                                //sh 'gulp test'
-                                sh "ls -l"
-                                sh './frontEndTests.sh'
-                            }
+                            unstash 'ws'
+                            //sh 'gulp test'
+                            sh './frontEndTests.sh'
                         }
                     }
                 },
                 'Performance' : {
                     script {
-                        /*node {
+                        node {
                             docker.image('maven:3-alpine').inside('-v ${HOME}/.m2:/root/.m2') {
                                 unstash 'ws'
                                 unstash 'war'
                                 sh './mvnw -B gatling:execute'
                             }
-                        }*/
+                        }
                     }
                 })
             }
