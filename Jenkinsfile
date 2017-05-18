@@ -1,4 +1,7 @@
 pipeline {
+    environment {
+        REL_VERSION = "${env.BRANCH_NAME.startswith('release-') ? "${env.BRANCH_NAME.drop(8)}.${env.BUILD_NUMBER}" : ""}"
+    }
     agent none
     stages {
         stage('Checkout') {
@@ -19,6 +22,11 @@ pipeline {
                 sh './mvnw -B -DskipTests=true clean compile package'
                 stash name: 'war', includes: 'target/**/*.war'
             }
+            post {
+                success {
+                    archive 'target/**/*.war'
+                }
+            }
         }
         stage('Test Backend') {
             agent {
@@ -31,8 +39,16 @@ pipeline {
                 unstash 'ws'
                 unstash 'war'
                 sh './mvnw -B test findbugs:findbugs'
-                junit '**/surefire-reports/**/*.xml'
-                findbugs pattern: 'target/**/findbugsXml.xml', unstableNewAll: '0' //unstableTotalAll: '0'
+            }
+            post {
+                success {
+                    junit '**/surefire-reports/**/*.xml'
+                    findbugs pattern: 'target/**/findbugsXml.xml', unstableNewAll: '0' //unstableTotalAll: '0'
+                }
+                unstable {
+                    junit '**/surefire-reports/**/*.xml'
+                    findbugs pattern: 'target/**/findbugsXml.xml', unstableNewAll: '0' //unstableTotalAll: '0'
+                }
             }
         }
         stage('Test More') {
@@ -77,11 +93,19 @@ pipeline {
             steps {
                unstash 'ws'
                unstash 'war'
-               sh './mvnw -B docker:build'
+               sh './mvnw -B -Drel.version=$REL_VERSION docker:build'
+            }
+            post {
+                success {
+                    archive 'docker/**/*'
+                }
             }
         }
         stage('Deploy to Staging') {
             agent any
+            environment {
+                STAGING_AUTH = credentials('staging')
+            }
             when {
                 allOf {
                     branch "master"
@@ -89,17 +113,20 @@ pipeline {
                 }
             }
             steps {
-               echo "Let's pretend a deployment is happening"
+               sh './deploy.sh staging -v $REL_VERSION -u $STAGING_AUTH_USR -p $STAGING_AUTH_PSW'
             }
         }
         stage('Deploy to production') {
             agent any
+            environment {
+                PROD_AUTH = credentials('production')
+            }
             when {
                 branch "release-*"
             }
             steps {
                input message: 'Deploy to production?', ok: 'Fire zee missiles!'
-               echo "Let's pretend a production deployment is happening"
+               sh './deploy.sh production -v $REL_VERSION -u $PROD_AUTH_USR -p $PROD_AUTH_PSW'
             }
         }
     }
