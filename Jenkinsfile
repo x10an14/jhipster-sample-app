@@ -42,7 +42,7 @@ pipeline {
                 'Frontend' : {
                     script {
                         node {
-                            docker.build('docker/gulp').inside {
+                            docker.build('latest', 'docker/gulp/').inside {
                                 unstash 'ws'
                                 sh 'gulp test'
                             }
