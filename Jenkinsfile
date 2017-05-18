@@ -45,7 +45,7 @@ pipeline {
                             docker.build('latest', 'docker/gulp/').inside {
                                 unstash 'ws'
                                 //sh 'gulp test'
-                                sh 'timeout 15 ping 8.8.8.8' //Can't make those tests work - doing something else for simplicity
+                                sh 'ping -w 15 8.8.8.8' //Can't make those tests work - doing something else for simplicity
                             }
                         }
                     }
