@@ -42,10 +42,8 @@ pipeline {
                 'Frontend' : {
                     script {
                         node {
-                            docker.image('node:alpine').inside {
+                            docker.build('-f docker/gulp/Dockerfile docker/gulp').inside {
                                 unstash 'ws'
-                                sh 'yarn install'
-                                sh 'yarn global add gulp-cli'
                                 sh 'gulp test'
                             }
                         }
