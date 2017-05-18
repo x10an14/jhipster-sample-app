@@ -101,8 +101,8 @@ module.exports = function (config) {
         singleRun: false,
 
         // to avoid DISCONNECTED messages when connecting to slow virtual machines
-        browserDisconnectTimeout: 10000, // default 2000
+        browserDisconnectTimeout: 20000, // default 2000
         browserDisconnectTolerance: 1, // default 0
-        browserNoActivityTimeout: 4 * 60 * 1000 //default 10000
+        browserNoActivityTimeout: 8 * 60 * 1000 //default 10000
     });
 };
