@@ -83,30 +83,6 @@ pipeline {
                 })
             }
         }
-        stage('Build Container') {
-            agent {
-               docker {
-                   image 'maven:3-alpine'
-                   args '-v $HOME/.m2:/root/.m2 -v /var/run/docker.sock:/var/run/docker.sock'
-               }
-            }
-            when {
-                anyOf {
-                    branch "master"
-                    branch "release-*"
-                }
-            }
-            steps {
-               unstash 'ws'
-               unstash 'war'
-               sh './mvnw -B -Drel.version=$REL_VERSION docker:build'
-            }
-            post {
-                success {
-                    archive 'docker/**/*'
-                }
-            }
-        }
         stage('Deploy to Staging') {
             agent any
             environment {
@@ -119,7 +95,8 @@ pipeline {
                 }
             }
             steps {
-               sh './deploy.sh staging -v $REL_VERSION -u $STAGING_AUTH_USR -p $STAGING_AUTH_PSW'
+                unstash 'war'
+                sh './deploy.sh staging -v $REL_VERSION -u $STAGING_AUTH_USR -p $STAGING_AUTH_PSW'
             }
         }
         stage('Deploy to production') {
@@ -131,8 +108,9 @@ pipeline {
                 branch "release-*"
             }
             steps {
-               input message: 'Deploy to production?', ok: 'Fire zee missiles!'
-               sh './deploy.sh production -v $REL_VERSION -u $PROD_AUTH_USR -p $PROD_AUTH_PSW'
+                input message: 'Deploy to production?', ok: 'Fire zee missiles!'
+                unstash 'war'
+                sh './deploy.sh production -v $REL_VERSION -u $PROD_AUTH_USR -p $PROD_AUTH_PSW'
             }
         }
     }
