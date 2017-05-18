@@ -62,5 +62,46 @@ pipeline {
                 })
             }
         }
+        stage('Build Container') {
+            agent {
+               docker {
+                   image 'maven:3-alpine'
+                   args '-v /root/.m2:/root/.m2 -v /var/run/docker.sock:/var/run/docker.sock'
+               }
+            }
+            when {
+                allOf {
+                    branch "master"
+                    branch "release-*"
+                }
+            }
+            steps {
+               unstash 'ws'
+               unstash 'war'
+               sh './mvnw -B docker:build'
+            }
+        }
+        stage('Deploy to Staging') {
+            agent any
+            when {
+                allOf {
+                    branch "master"
+                    branch "release-*"
+                }
+            }
+            steps {
+               echo "Let's pretend a deployment is happening"
+            }
+        }
+        stage('Deploy to production') {
+            agent any
+            when {
+                branch "release-*"
+            }
+            steps {
+               input message: 'Deploy to production?', ok: 'Fire zee missiles!'
+               echo "Let's pretend a production deployment is happening"
+            }
+        }
     }
 }
