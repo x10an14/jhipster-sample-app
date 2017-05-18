@@ -2,7 +2,7 @@ pipeline {
     agent none
     stages {
         stage('Checkout') {
-            agent any  
+            agent any
             steps {
               stash(name: 'ws', includes: '**')
             }
@@ -42,7 +42,7 @@ pipeline {
                 'Frontend' : {
                     script {
                         node {
-                            docker.build('-f docker/gulp/Dockerfile docker/gulp').inside {
+                            docker.build('docker/gulp').inside {
                                 unstash 'ws'
                                 sh 'gulp test'
                             }
