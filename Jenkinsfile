@@ -32,7 +32,7 @@ pipeline {
             unstash 'war'
             sh './mvnw -B test findbugs:findbugs'
             junit '**/surefire-reports/**/*.xml'
-            findbugs pattern: 'target/**/findbugsXml.xml', unstableTotalAll: '0'
+            findbugs pattern: 'target/**/findbugsXml.xml', unstableNewAll: '0'
         }
     }
   }
