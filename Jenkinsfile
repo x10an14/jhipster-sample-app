@@ -20,5 +20,20 @@ pipeline {
               stash name: 'war', includes: 'target/**/*.war'
           }
       }
+      stage('Test Backend') {
+        agent {
+            docker {
+                image 'maven:3-alpine'
+                args '-v /root/.m2:/root/.m2'
+            }
+        }
+        steps {
+            unstash 'ws'
+            unstash 'war'
+            sh './mvnw -B test findbugs:findbugs'
+            junit '**/surefire-reports/**/*.xml'
+            findbugs pattern: 'target/**/findbugsXml.xml', unstableTotalAll: '0'
+        }
+    }
   }
 }
