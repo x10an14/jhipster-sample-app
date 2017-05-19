@@ -100,8 +100,9 @@ pipeline {
             }
             steps {
                 unstash 'war'
-                sh './deploy.sh staging -v $REL_VERSION -u $STAGING_AUTH_USR -p $STAGING_AUTH_PSW'
+                sh './deploy.sh staging -v $REL_VERSION -u $STAGING_AUTH_USR -p $STAGING_AUTH_PSW'                
             }
+            //Post: Send notifications; hipchat, slack, send email etc.
         }
         stage('Archive') {
             agent any
@@ -135,4 +136,5 @@ pipeline {
             }
         }
     }
+    //Post: notifications; hipchat, slack, send email etc.
 }
