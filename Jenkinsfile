@@ -3,11 +3,15 @@ pipeline {
         REL_VERSION = "${BRANCH_NAME.contains('release-') ? BRANCH_NAME.drop(BRANCH_NAME.lastIndexOf('-')+1) + '.' + BUILD_NUMBER : ""}"
     }
     agent none
+    options {
+        skipDefaultCheckout()
+    }
     stages {
         stage('Checkout') {
             agent any
             steps {
-              stash(name: 'ws', includes: '**')
+                checkout scm
+                stash(name: 'ws', includes: '**')
             }
         }
         stage('Build Backend') {
@@ -111,7 +115,7 @@ pipeline {
             }
             steps {
                 unstash 'war'
-                archiveArtifacts allowEmptyArchive: true, artifacts: 'target/**/*.war', fingerprint: true
+                archiveArtifacts artifacts: 'target/**/*.war', fingerprint: true, allowEmptyArchive: true
             }
         }
         stage('Deploy to production') {
