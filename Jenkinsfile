@@ -1,6 +1,6 @@
 pipeline {
     environment {
-        REL_VERSION = "${env.BRANCH_NAME.contains('release-') ? "${env.BRANCH_NAME.drop(env.BRANCH_NAME.lastIndexOf('-')+1)}.${env.BUILD_NUMBER}" : ""}"
+        REL_VERSION = "${BRANCH_NAME.contains('release-') ? BRANCH_NAME.drop(BRANCH_NAME.lastIndexOf('-')+1) + '.' + BUILD_NUMBER : ""}"
     }
     agent none
     stages {
