@@ -77,7 +77,7 @@ pipeline {
                 'Performance' : {
                     script {
                         node {
-                            docker.image('maven:3-alpine').inside('-v ${HOME}/.m2:/root/.m2') {
+                            docker.image('maven:3-alpine').inside('-v $HOME/.m2:/root/.m2') {
                                 unstash 'ws'
                                 unstash 'war'
                                 sh './mvnw -B gatling:execute'
