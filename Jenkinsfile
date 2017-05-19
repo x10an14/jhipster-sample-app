@@ -99,6 +99,21 @@ pipeline {
                 sh './deploy.sh staging -v $REL_VERSION -u $STAGING_AUTH_USR -p $STAGING_AUTH_PSW'
             }
         }
+        stage('Archive') {
+            agent any
+            when {
+                not {
+                    anyOf {
+                        branch "master"
+                        branch "release-*"
+                    }
+                }
+            }
+            steps {
+                unstash 'war'
+                archiveArtifacts allowEmptyArchive: true, artifacts: 'target/**/*.war', fingerprint: true
+            }
+        }
         stage('Deploy to production') {
             agent any
             environment {
