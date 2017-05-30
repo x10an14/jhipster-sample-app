@@ -23,11 +23,30 @@ pipeline {
           sh './mvnw -B -DskipTests=true clean compile package'
           stash name: 'war', includes: 'target/**/*.war'
       }
+      post {
+          success {
+              archive 'target/**/*.war'
+          }
+      }
     }
     stage('Test Backend') {
-      steps {
-        echo 'testing the bits'
-      }
+        agent {
+            docker {
+                image 'maven:3-alpine'
+                args '-v $HOME/.m2:/root/.m2'
+            }
+        }
+        steps {
+            unstash 'ws'
+            unstash 'war'
+            sh './mvnw -B test findbugs:findbugs'
+        }
+        post {
+            success {
+                junit '**/surefire-reports/**/*.xml'
+                findbugs pattern: 'target/**/findbugsXml.xml', unstableTotalAll: '0'
+            }
+        }
     }
     stage('More Tests') {
       steps {
